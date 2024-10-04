@@ -1,0 +1,40 @@
+# CMake ignores
+CMakeLists.txt.user
+CMakeFiles/
+CMakeCache.txt
+*.cmake
+*.ninja
+
+# Build directories
+build/
+cmake-build-*/
+
+# CLion specific ignores
+.idea/
+*.iml
+
+# Compiled object files and executables
+*.o
+*.obj
+*.exe
+*.out
+*.app
+*.dll
+*.so
+*.dylib
+*.pdb
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+*.swp
+
+# Other files
+*.DS_Store
+*.user
+
+# Generated files
+*.json
+*.xml
+*.sublime-workspace
