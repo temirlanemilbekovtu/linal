@@ -46,13 +46,28 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &matrix) {
     const int &k = matrix._cols;
     Matrix<T> result(m, k);
 
-    for(int i = 0; i < k; ++i) {
-        for(int j = 0; j < m; ++j) {
-            T entry {};
-            for(int l = 0; l < n; ++l) {
-                entry += get(m, n) * matrix.get(n, k);
+    auto compute_factor = [](Matrix<T> &matrix, T *factor[], int base, int n) {
+        for(int i = 0; i < base; ++i) {
+            factor[i] = 0;
+            for(int j = 0; j < n; j += 2) {
+                 factor += matrix.get(i, j) * matrix.get(i, j + 1);
             }
-            result.set(m, k, entry);
+        }
+    };
+
+    T row_factor[m];
+    T col_factor[k];
+
+    compute_factor(this, row_factor, m, n);
+    compute_factor(matrix, col_factor, k, n);
+
+    for(int i = 0; i < m; ++i) {
+        for(int j = 0; j < k; ++j) {
+            T entry = (row_factor[i] * col_factor[j]) * -1;
+            for(int t = 0; t < n; t += 2) {
+                entry += (get(i, t) + matrix.get(t + 1, j)) * (get(i, t + 1) + matrix.get(t, j));
+            }
+            result.set(i, j, entry);
         }
     }
 
