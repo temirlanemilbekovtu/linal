@@ -9,7 +9,7 @@ Matrix<T>::Matrix(const int rows, const int cols)
 }
 
 template<typename T>
-Matrix<T>::Matrix(const Matrix &matrix)
+Matrix<T>::Matrix(const Matrix<T> &matrix)
 : _rows(matrix._rows), _cols(matrix._cols) {
     int cardinality = get_cardinality();
     for(int i = 0; i < cardinality; ++i) {
@@ -18,7 +18,7 @@ Matrix<T>::Matrix(const Matrix &matrix)
 }
 
 template<typename T>
-Matrix<T> Matrix<T>::operator+(const Matrix<T> &matrix) {
+Matrix<T> Matrix<T>::operator+(const Matrix<T> &matrix) const {
     if (_rows != matrix._rows || _cols != matrix._cols) {
         throw std::invalid_argument("Matrix sizes don't match for the sum operation!");
     }
@@ -27,8 +27,8 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T> &matrix) {
 
     for(int i = 0; i < _rows; ++i) {
         for(int j = 0; j < _cols; ++j) {
-            T entry = get(i, j) + matrix.get(i, j);
-            result.set(i, j, entry);
+            T entry = get_entry(i, j) + matrix.get_entry(i, j);
+            result.set_entry(i, j, entry);
         }
     }
 
@@ -36,7 +36,7 @@ Matrix<T> Matrix<T>::operator+(const Matrix<T> &matrix) {
 }
 
 template<typename T>
-Matrix<T> Matrix<T>::operator*(const Matrix<T> &matrix) {
+Matrix<T> Matrix<T>::operator*(const Matrix<T> &matrix) const {
     if (_cols != matrix._rows) {
         throw std::invalid_argument("Matrix sizes don't match for the multiplication operation!");
     }
@@ -50,7 +50,7 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &matrix) {
         for(int i = 0; i < base; ++i) {
             factor[i] = 0;
             for(int j = 0; j < n; j += 2) {
-                 factor += matrix.get(i, j) * matrix.get(i, j + 1);
+                 factor += matrix.get_entry(i, j) * matrix.get_entry(i, j + 1);
             }
         }
     };
@@ -65,9 +65,9 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &matrix) {
         for(int j = 0; j < k; ++j) {
             T entry = (row_factor[i] * col_factor[j]) * -1;
             for(int t = 0; t < n; t += 2) {
-                entry += (get(i, t) + matrix.get(t + 1, j)) * (get(i, t + 1) + matrix.get(t, j));
+                entry += (get_entry(i, t) + matrix.get_entry(t + 1, j)) * (get_entry(i, t + 1) + matrix.get_entry(t, j));
             }
-            result.set(i, j, entry);
+            result.set_entry(i, j, entry);
         }
     }
 
@@ -75,13 +75,13 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &matrix) {
 }
 
 template<typename T>
-Matrix<T> Matrix<T>::operator*(const T &value) {
+Matrix<T> Matrix<T>::operator*(const T &value) const {
     Matrix<T> result(_rows, _cols);
 
     for(int i = 0; i < _rows; ++i) {
         for(int j = 0; j < _cols; ++j) {
-            T entry = get(i, j) * value;
-            result.set(i, j, entry);
+            T entry = get_entry(i, j) * value;
+            result.set_entry(i, j, entry);
         }
     }
 
@@ -90,28 +90,28 @@ Matrix<T> Matrix<T>::operator*(const T &value) {
 
 
 template<typename T>
-int Matrix<T>::get_cardinality() {
+int Matrix<T>::get_cardinality() const {
     return _rows * _cols;
 }
 
 template<typename T>
-int Matrix<T>::get_rows() {
+int Matrix<T>::get_rows() const {
     return _rows;
 }
 
 template<typename T>
-int Matrix<T>::get_cols() {
+int Matrix<T>::get_cols() const {
     return _cols;
 }
 
 template<typename T>
-T Matrix<T>::get(const int row, const int col) {
+T Matrix<T>::get_entry(const int row, const int col) const {
     int index = row * _cols + col;
     return _data[index];
 }
 
 template<typename T>
-void Matrix<T>::set(const int row, const int col, const T &value) {
+void Matrix<T>::set_entry(const int row, const int col, const T &value) {
     int index = row * _cols + col;
     _data[index] = value;
 }

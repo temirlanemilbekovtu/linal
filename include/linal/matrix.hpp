@@ -13,24 +13,24 @@ struct LINAL_API Matrix {
     static_assert(is_multipliable<T>::value_type, "Type must support multiplication");
 
 private:
-    const int               _rows;
-    const int               _cols;
-    std::unique_ptr<T[]>    _data;
+    const int                   _rows;
+    const int                   _cols;
+    std::unique_ptr<T[]>        _data;
 
 public:
-    Matrix(const int rows, const int cols);
-    Matrix(const Matrix &matrix);
+    explicit        Matrix(const int rows, const int cols);
+                    Matrix(const Matrix<T> &matrix);
 
-    Matrix<T> operator+(const Matrix<T> &matrix);
-    Matrix<T> operator*(const Matrix<T> &matrix);
-    Matrix<T> operator*(const T &value);
+    Matrix<T>       operator+(const Matrix<T> &matrix) const;
+    Matrix<T>       operator*(const Matrix<T> &matrix) const;
+    Matrix<T>       operator*(const T &value) const;
 
-    int     get_cardinality();
-    int     get_rows();
-    int     get_cols();
+    int             get_cardinality() const;
+    int             get_rows() const;
+    int             get_cols() const;
 
-    T       get(const int row, const int col);
-    void    set(const int row, const int col, const T &value);
+    T               get_entry(const int row, const int col) const;
+    void            set_entry(const int row, const int col, const T &value);
 };
 
 
