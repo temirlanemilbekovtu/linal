@@ -71,6 +71,15 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &matrix) const {
         }
     }
 
+    if (n % 2 == 1) {
+        for(int i = 0; i < m; ++i) {
+            for(int j = 0; j < k; ++j) {
+                T entry = get_entry(i, n) * matrix.get_entry(n, j);
+                result.set_entry(i, j, entry);
+            }
+        }
+    }
+
     return result;
 }
 
