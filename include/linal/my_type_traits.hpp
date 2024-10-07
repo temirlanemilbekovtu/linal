@@ -5,8 +5,7 @@
 
 #include <type_traits>
 #include <utility>
-
-#include "linal/export.hpp"
+#include "export.hpp"
 
 LINAL_API
 template <typename T, typename = void>

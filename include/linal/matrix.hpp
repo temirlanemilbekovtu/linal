@@ -4,14 +4,13 @@
 #define LINAL_MATRIX_HPP
 
 #include <memory>
-
 #include "export.hpp"
 #include "my_type_traits.hpp"
 
 template <typename T>
 struct LINAL_API Matrix {
-    static_assert(is_addable<T>::value_type, "Type must support addition");
-    static_assert(is_multipliable<T>::value_type, "Type must support multiplication");
+    static_assert(is_addable<T>::value, "Type must support addition");
+    static_assert(is_multipliable<T>::value, "Type must support multiplication");
 
 private:
     const int                   _rows;
@@ -33,6 +32,5 @@ public:
     T               get_entry(const int row, const int col) const;
     void            set_entry(const int row, const int col, const T &value);
 };
-
 
 #endif //LINAL_MATRIX_HPP
