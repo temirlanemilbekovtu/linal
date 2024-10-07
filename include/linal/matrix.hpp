@@ -4,6 +4,7 @@
 #define LINAL_MATRIX_HPP
 
 #include <memory>
+
 #include "export.hpp"
 #include "my_type_traits.hpp"
 
