@@ -8,11 +8,9 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_C_COMPILER clang)
 set(CMAKE_CXX_COMPILER clang++)
 
-add_library(linal SHARED
-        src/matrix.cpp
-)
+add_library(linal INTERFACE)
 
-target_include_directories(linal PUBLIC
+target_include_directories(linal INTERFACE
         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
         $<INSTALL_INTERFACE:include>
 )
