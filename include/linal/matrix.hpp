@@ -3,6 +3,7 @@
 #ifndef LINAL_MATRIX_HPP
 #define LINAL_MATRIX_HPP
 
+#include <vector>
 #include <memory>
 #include <stdexcept>
 #include <iostream>
@@ -68,6 +69,10 @@ public:
         }
 
         return result;
+    }
+
+    T* operator[](const size_t row) {
+        return &data[row * _cols];
     }
 
     static Matrix<T> mul_classic(const Matrix<T> &a, const Matrix<T> &b) {
