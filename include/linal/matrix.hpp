@@ -42,8 +42,7 @@ public:
 
         for(int i = 0; i < _rows; ++i) {
             for(int j = 0; j < _cols; ++j) {
-                T entry = get_entry(i, j) + matrix.get_entry(i, j);
-                result.set_entry(i, j, entry);
+                result[i][j] = this[i][j] + matrix[i][j];
             }
         }
 
@@ -63,8 +62,7 @@ public:
 
         for(int i = 0; i < _rows; ++i) {
             for(int j = 0; j < _cols; ++j) {
-                T entry = get_entry(i, j) * value;
-                result.set_entry(i, j, entry);
+                result[i][j] = this[i][j] * value;
             }
         }
 
@@ -87,11 +85,10 @@ public:
 
         for(int i = 0; i < k; ++i) {
             for(int j = 0; j < m; ++j) {
-                T entry {};
+                result[i][j] = T();
                 for(int l = 0; l < n; ++l) {
-                    entry += a.get_entry(m, n) * b.get_entry(n, k);
+                    result[m][k] += a[m][n] * b[n][k];
                 }
-                result.set_entry(m, k, entry);
             }
         }
 
@@ -116,32 +113,30 @@ public:
         for(int i = 0; i < m; ++i) {
             row_factor[i] = T();
             for(int j = 0; j < n_half; j += 2) {
-                row_factor[i] += a.get_entry(i, j) * a.get_entry(i, j + 1);
+                row_factor[i] += a.[i][j] * a[i][j + 1];
             }
         }
 
         for(int i = 0; i < k; ++i) {
             col_factor[i] = T();
             for(int j = 0; j < n_half; j += 2) {
-                col_factor[i] += b.get_entry(j, i) * b.get_entry(j + 1, i);
+                col_factor[i] += b[j][i] * b[j + 1][i];
             }
         }
 
         for(int i = 0; i < m; ++i) {
             for(int j = 0; j < k; ++j) {
-                T entry = -1 * (row_factor[i] + col_factor[j]);
+                result[i][j] = -1 * (row_factor[i] + col_factor[j]);
                 for(int t = 0; t < n_half; t += 2) {
-                    entry += (a.get_entry(i, t) + b.get_entry(t + 1, j)) * (a.get_entry(i, t + 1) + b.get_entry(t, j));
+                    result[i][j] += (a.[i][t] + b[t + 1][j]) * (a[i][t + 1] + b.[t][j]);
                 }
-                result.set_entry(i, j, entry);
             }
         }
 
         if (n % 2 == 1) {
             for(int i = 0; i < m; ++i) {
                 for(int j = 0; j < k; ++j) {
-                    T entry = result.get_entry(i, j) + get_entry(i, n_less) * matrix.get_entry(n_less, j);
-                    result.set_entry(i, j, entry);
+                    result[i][j] += a[i][n_less] * b[n_less][j];
                 }
             }
         }
