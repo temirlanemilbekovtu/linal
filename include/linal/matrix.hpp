@@ -54,9 +54,53 @@ public:
             throw std::invalid_argument("Matrix sizes don't match for the multiplication operation!");
         }
 
-        const int &m = _rows;
-        const int &n = _cols;
-        const int &k = matrix._cols;
+        return mul_classic(this, matrix);
+    }
+
+    Matrix<T> operator*(const T &value) const {
+        Matrix<T> result(_rows, _cols);
+
+        for(int i = 0; i < _rows; ++i) {
+            for(int j = 0; j < _cols; ++j) {
+                T entry = get_entry(i, j) * value;
+                result.set_entry(i, j, entry);
+            }
+        }
+
+        return result;
+    }
+
+    static Matrix<T> mul_classic(const Matrix<T> &a, const Matrix<T> &b) {
+        if (a.get_cols() != b.get_rows()) {
+            throw std::invalid_argument("Matrix sizes don't match for the multiplication operation!");
+        }
+
+        const int &m = a.get_rows();
+        const int &n = a.get_cols();
+        const int &k = b.get_cols();
+        Matrix<T> result(m, k);
+
+        for(int i = 0; i < k; ++i) {
+            for(int j = 0; j < m; ++j) {
+                T entry {};
+                for(int l = 0; l < n; ++l) {
+                    entry += a.get_entry(m, n) * b.get_entry(n, k);
+                }
+                result.set_entry(m, k, entry);
+            }
+        }
+
+        return result;
+    }
+
+    static Matrix<T> mul_winograd(const Matrix<T> &a, const Matrix<T> &b) {
+        if (a.get_cols() != b.get_rows()) {
+            throw std::invalid_argument("Matrix sizes don't match for the multiplication operation!");
+        }
+
+        const int &m = a.get_rows();
+        const int &n = a.get_cols();
+        const int &k = b.get_cols();
         Matrix<T> result{m, k};
 
         int n_half = n / 2;
@@ -67,14 +111,14 @@ public:
         for(int i = 0; i < m; ++i) {
             row_factor[i] = T();
             for(int j = 0; j < n_half; j += 2) {
-                row_factor[i] += get_entry(i, j) * get_entry(i, j + 1);
+                row_factor[i] += a.get_entry(i, j) * a.get_entry(i, j + 1);
             }
         }
 
         for(int i = 0; i < k; ++i) {
             col_factor[i] = T();
             for(int j = 0; j < n_half; j += 2) {
-                col_factor[i] += matrix.get_entry(j, i) * matrix.get_entry(j + 1, i);
+                col_factor[i] += b.get_entry(j, i) * b.get_entry(j + 1, i);
             }
         }
 
@@ -82,7 +126,7 @@ public:
             for(int j = 0; j < k; ++j) {
                 T entry = -1 * (row_factor[i] + col_factor[j]);
                 for(int t = 0; t < n_half; t += 2) {
-                    entry += (get_entry(i, t) + matrix.get_entry(t + 1, j)) * (get_entry(i, t + 1) + matrix.get_entry(t, j));
+                    entry += (a.get_entry(i, t) + b.get_entry(t + 1, j)) * (a.get_entry(i, t + 1) + b.get_entry(t, j));
                 }
                 result.set_entry(i, j, entry);
             }
@@ -94,19 +138,6 @@ public:
                     T entry = result.get_entry(i, j) + get_entry(i, n_less) * matrix.get_entry(n_less, j);
                     result.set_entry(i, j, entry);
                 }
-            }
-        }
-
-        return result;
-    }
-
-    Matrix<T> operator*(const T &value) const {
-        Matrix<T> result(_rows, _cols);
-
-        for(int i = 0; i < _rows; ++i) {
-            for(int j = 0; j < _cols; ++j) {
-                T entry = get_entry(i, j) * value;
-                result.set_entry(i, j, entry);
             }
         }
 
