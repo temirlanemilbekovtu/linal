@@ -17,6 +17,14 @@ struct is_addable<T, std::void_t<decltype(std::declval<T>() + std::declval<T>())
 
 LINAL_API
 template <typename T, typename = void>
+struct is_deductible : std::false_type {};
+
+LINAL_API
+template <typename T>
+struct is_deductible<T, std::void_t<decltype(std::declval<T>() - std::declval<T>())>> : std::true_type {};
+
+LINAL_API
+template <typename T, typename = void>
 struct is_multipliable : std::false_type {};
 
 LINAL_API
