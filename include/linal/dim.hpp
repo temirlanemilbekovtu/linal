@@ -14,6 +14,8 @@ struct LINAL_API Dim {
     explicit Dim(const size_t rows, const size_t cols);
 
     Dim &operator=(const Dim &other);
+    bool operator==(const Dim &other) const;
+    bool operator!=(const Dim &other) const;
 
     size_t get_card() const;
 };
