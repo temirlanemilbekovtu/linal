@@ -27,23 +27,18 @@ public:
         STRASSEN,
     };
 
-    enum Quadrant {
-        TOP_LEFT,
-        TOP_RIGHT,
-        BOTTOM_LEFT,
-        BOTTOM_RIGHT,
-    };
-
 private:
-    const Dim _size;
-    std::unique_ptr<T[]> _data;
+    Dim _size;
+    Point _offset;
+    std::shared_ptr<T> _data;
+
+    explicit Matrix(Dim size, const Point offset, const Matrix<T> &parent);
 
     static Matrix<T> mul_classic(const Matrix<T> &lhs, const Matrix<T> &rhs);
     static Matrix<T> mul_winograd(const Matrix<T> &lhs, const Matrix<T> &rhs);
     static Matrix<T> mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs);
 
 public:
-
     explicit Matrix(const Dim size);
     explicit Matrix(const Dim size, const T &default_value);
     Matrix(const Matrix<T> &other);
@@ -61,6 +56,7 @@ public:
     void mul(const T &value);
 
     Matrix<T> &operator=(const Matrix<T> &source);
+    Matrix<T> &operator=(Matrix<T> &&source);
     Matrix<T> operator+(const Matrix<T> &other) const;
     Matrix<T> operator-(const Matrix<T> &other) const;
     Matrix<T> operator*(const Matrix<T> &other) const;
@@ -68,6 +64,7 @@ public:
     T* operator[](const size_t index);
     const T* operator[](const size_t index) const;
 
+    Matrix<T> submatrix(Dim size, Point offset);
     Matrix<T> &get_square_power_of_two() const;
 
     bool is_square() const;
@@ -78,12 +75,22 @@ public:
     const T &at(const Point index) const;
 };
 
+#pragma region private_constructors
+
+template<typename T>
+Matrix<T>::Matrix(const Dim size, const Point offset, const Matrix<T> &parent)
+: _size(size)
+, _offset(offset)
+, _data(parent._data) { }
+
+#pragma endregion
+
 #pragma region constructors
 
 template<typename T>
 Matrix<T>::Matrix(const Dim size)
 : _size(size)
-, _data(std::make_unique<T[]>(size.get_card())) { }
+, _data(std::make_shared<T[]>(size.get_card())) { }
 
 template<typename T>
 Matrix<T>::Matrix(const Dim size, const T &default_value) : Matrix(size) {
@@ -117,6 +124,23 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &source) {
 }
 
 template<typename T>
+Matrix<T> &Matrix<T>::operator=(Matrix<T> &&source) {
+    if (this != &source) {
+        _data.reset();
+
+        _size = source._size;
+        _offset = source._offset;
+        _data = std::move(source._data);
+
+        source._size = Dim(0, 0);
+        source._offset = Point();
+        source._data.reset();
+    }
+
+    return *this;
+}
+
+template<typename T>
 Matrix<T> Matrix<T>::operator+(const Matrix<T> &other) const {
     return sum(*this, other);
 }
@@ -128,7 +152,7 @@ Matrix<T> Matrix<T>::operator-(const Matrix<T> &other) const {
 
 template<typename T>
 Matrix<T> Matrix<T>::operator*(const Matrix<T> &other) const {
-    // multiplication should be here
+    // to be implemented
     return Matrix{other.get_size()};
 }
 
@@ -317,6 +341,14 @@ void Matrix<T>::mul(const T &value) {
 #pragma endregion
 
 #pragma region other
+
+template<typename T>
+Matrix<T> Matrix<T>::submatrix(Dim size, Point offset) {
+    if (offset.row + size.rows >= _size.rows || offset.col + size.cols > _size.cols) {
+        throw std::invalid_argument("Submatrix exceeds parent matrix dimensions!");
+    }
+    return Matrix(size, offset, *this);
+}
 
 template<typename T>
 bool Matrix<T>::is_square() const {
