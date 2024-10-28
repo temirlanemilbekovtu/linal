@@ -30,13 +30,18 @@ public:
 private:
     Dim _size;
     Point _offset;
-    std::shared_ptr<T> _data;
+    size_t _offset_plain;
+    size_t _total_cols;
+    std::shared_ptr<T[]> _data;
 
     explicit Matrix(Dim size, const Point offset, const Matrix<T> &parent);
 
     static Matrix<T> mul_classic(const Matrix<T> &lhs, const Matrix<T> &rhs);
     static Matrix<T> mul_winograd(const Matrix<T> &lhs, const Matrix<T> &rhs);
     static Matrix<T> mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs);
+
+    size_t get_index_or_throw(const size_t index) const;
+    size_t get_index_or_throw(const size_t row, const size_t col) const;
 
 public:
     explicit Matrix(const Dim size);
@@ -56,49 +61,52 @@ public:
     void mul(const T &value);
 
     Matrix<T> &operator=(const Matrix<T> &source);
-    Matrix<T> &operator=(Matrix<T> &&source);
+    Matrix<T> &operator=(Matrix<T> &&source) noexcept;
     Matrix<T> operator+(const Matrix<T> &other) const;
     Matrix<T> operator-(const Matrix<T> &other) const;
     Matrix<T> operator*(const Matrix<T> &other) const;
     Matrix<T> operator*(const T &value) const;
-    T* operator[](const size_t index);
-    const T* operator[](const size_t index) const;
+    T &operator[](const size_t index);
+    const T &operator[](const size_t index) const;
 
     Matrix<T> submatrix(Dim size, Point offset);
-    Matrix<T> &get_square_power_of_two() const;
+    Matrix<T> get_square_pow2() const;
 
     bool is_square() const;
-    bool is_square_power_of_two() const;
+    bool is_pow2() const;
     Dim get_size() const;
 
     T &at(const Point index);
     const T &at(const Point index) const;
 };
 
-#pragma region private_constructors
-
-template<typename T>
-Matrix<T>::Matrix(const Dim size, const Point offset, const Matrix<T> &parent)
-: _size(size)
-, _offset(offset)
-, _data(parent._data) { }
-
-#pragma endregion
-
 #pragma region constructors
 
 template<typename T>
-Matrix<T>::Matrix(const Dim size)
-: _size(size)
-, _data(std::make_shared<T[]>(size.get_card())) { }
+Matrix<T>::Matrix(const Dim size, const Point offset, const Matrix<T> &parent)
+        : _size(size)
+        , _offset(offset)
+        , _offset_plain(_offset.row * _total_cols + _offset.col)
+        , _total_cols(parent._total_cols)
+        , _data(parent._data) { }
 
 template<typename T>
-Matrix<T>::Matrix(const Dim size, const T &default_value) : Matrix(size) {
-    std::fill(_data, _data + size.get_card(), default_value);
+Matrix<T>::Matrix(const Dim size)
+        : _size(size)
+        , _offset()
+        , _offset_plain()
+        , _total_cols(size.get_cols())
+        , _data(std::make_shared<T[]>(size.get_card())) { }
+
+template<typename T>
+Matrix<T>::Matrix(const Dim size, const T &default_value)
+        : Matrix(size) {
+    std::fill(_data.get(), _data.get() + size.get_card(), default_value);
 }
 
 template<typename T>
-Matrix<T>::Matrix(const Matrix<T> &other) : Matrix(other._size) {
+Matrix<T>::Matrix(const Matrix<T> &other)
+        : Matrix(other._size) {
     int card = _size.get_card();
     for(int i = 0; i < card; ++i) {
         this[i] = other[i];
@@ -112,7 +120,11 @@ Matrix<T>::Matrix(const Matrix<T> &other) : Matrix(other._size) {
 template<typename T>
 Matrix<T> &Matrix<T>::operator=(const Matrix<T> &source) {
     if (this != &source) {
-        _size = source.get_size();
+        _size = source._size;
+        _offset = Point();
+        _offset_plain = 0;
+        _total_cols = _size.get_cols();
+
         size_t card = _size.get_card();
         _data = std::make_unique<T[]>(card);
         for(int i = 0; i < card; ++i) {
@@ -124,16 +136,20 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &source) {
 }
 
 template<typename T>
-Matrix<T> &Matrix<T>::operator=(Matrix<T> &&source) {
+Matrix<T> &Matrix<T>::operator=(Matrix<T> &&source) noexcept {
     if (this != &source) {
         _data.reset();
 
         _size = source._size;
         _offset = source._offset;
+        _offset_plain = source._offset_plain;
+        _total_cols = _size.get_cols();
         _data = std::move(source._data);
 
         source._size = Dim(0, 0);
         source._offset = Point();
+        source._offset_plain = 0;
+        source._total_cols = 0;
         source._data.reset();
     }
 
@@ -159,6 +175,16 @@ Matrix<T> Matrix<T>::operator*(const Matrix<T> &other) const {
 template<typename T>
 Matrix<T> Matrix<T>::operator*(const T &value) const {
     return mul(*this, value);
+}
+
+template<typename T>
+T &Matrix<T>::operator[](const size_t index) {
+     return _data.get()[get_index_or_throw(index)];
+}
+
+template<typename T>
+const T &Matrix<T>::operator[](const size_t index) const {
+    return _data.get()[get_index_or_throw(index)];
 }
 
 #pragma endregion
@@ -199,9 +225,9 @@ Matrix<T> Matrix<T>::mul(const Matrix<T> &lhs, const Matrix<T> &rhs, MulType typ
         case MulType::CLASSIC:
             return mul_classic(lhs, rhs);
         case MulType::WINOGRAD:
-            return mul_classic(lhs, rhs);
+            return mul_winograd(lhs, rhs);
         case MulType::STRASSEN:
-            return mul_classic(lhs, rhs);
+            return mul_strassen(lhs, rhs);
     }
 
     return mul_classic(lhs, rhs);
@@ -211,8 +237,8 @@ template<typename T>
 Matrix<T> Matrix<T>::mul(const Matrix<T> &obj, const T &value) {
     Dim size = obj.get_size();
     Matrix<T> result{size};
-    for(int i = 0; i < size.rows; ++i) {
-        for(int j = 0; j < size.cols; ++j) {
+    for(int i = 0; i < size.get_rows(); ++i) {
+        for(int j = 0; j < size.get_cols(); ++j) {
             result[i][j] = obj[i][j] * value;
         }
     }
@@ -223,9 +249,9 @@ template<typename T>
 Matrix<T> Matrix<T>::mul_classic(const Matrix<T> &lhs, const Matrix<T> &rhs) {
     check_multiplicity(lhs, rhs);
 
-    const int &m = lhs.get_size().rows;
-    const int &n = lhs.get_size().cols;
-    const int &k = rhs.get_size().cols;
+    const int &m = lhs.get_size().get_rows();
+    const int &n = lhs.get_size().get_cols();
+    const int &k = rhs.get_size().get_cols();
     Matrix<T> result{Dim(m, k)};
 
     for(int i = 0; i < m; ++i) {
@@ -243,9 +269,9 @@ template<typename T>
 Matrix<T> Matrix<T>::mul_winograd(const Matrix<T> &lhs, const Matrix<T> &rhs) {
     check_multiplicity(lhs, rhs);
 
-    const size_t &m = lhs.get_size().rows;
-    const size_t &n = lhs.get_size().cols;
-    const size_t &k = rhs.get_size().cols;
+    const size_t &m = lhs.get_size().get_rows();
+    const size_t &n = lhs.get_size().get_cols();
+    const size_t &k = rhs.get_size().get_cols();
     Matrix<T> result{Dim(m, k)};
 
     size_t n_half = n / 2;
@@ -290,24 +316,6 @@ Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
 
 #pragma endregion
 
-#pragma region other_static
-
-template<typename T>
-void Matrix<T>::check_same_size(const Matrix<T> &a, const Matrix<T> &b) {
-    if (a.get_size() != a.get_size()) {
-        throw std::invalid_argument("Matrices must have the same dimensions!");
-    }
-}
-
-template<typename T>
-void Matrix<T>::check_multiplicity(const Matrix<T> &lhs, const Matrix<T> &rhs) {
-    if (lhs.get_size().cols != rhs.get_size().rows) {
-        throw std::invalid_argument("Dimensions don't match for multiplication!");
-    }
-}
-
-#pragma endregion
-
 #pragma region arithmetic
 
 template<typename T>
@@ -343,8 +351,44 @@ void Matrix<T>::mul(const T &value) {
 #pragma region other
 
 template<typename T>
+void Matrix<T>::check_same_size(const Matrix<T> &a, const Matrix<T> &b) {
+    if (a.get_size() != a.get_size()) {
+        throw std::invalid_argument("Matrices must have the same dimensions!");
+    }
+}
+
+template<typename T>
+void Matrix<T>::check_multiplicity(const Matrix<T> &lhs, const Matrix<T> &rhs) {
+    if (lhs.get_size().get_cols() != rhs.get_size().get_rows()) {
+        throw std::invalid_argument("Dimensions don't match for multiplication!");
+    }
+}
+
+template<typename T>
+size_t Matrix<T>::get_index_or_throw(const size_t index) const {
+    if (index > _size.get_card()) {
+        throw std::out_of_range("Index out of Matrix bounds!");
+    }
+
+    if (_size.get_cols() != _total_cols) {
+        size_t row = index / _total_cols;
+        size_t col = index % _total_cols;
+        return _offset_plain + col + row * _size.get_cols();
+    }
+    return index;
+}
+
+template<typename T>
+size_t Matrix<T>::get_index_or_throw(const size_t row, const size_t col) const {
+    if (row < _size.get_rows() && col < _size.get_cols()) {
+        throw std::out_of_range("Index out of Matrix bounds!");
+    }
+    return _offset_plain + col + row * _size.get_cols();
+}
+
+template<typename T>
 Matrix<T> Matrix<T>::submatrix(Dim size, Point offset) {
-    if (offset.row + size.rows >= _size.rows || offset.col + size.cols > _size.cols) {
+    if (offset.row + size.get_rows() >= _size.get_rows() || offset.col + size.get_cols() > _size.get_cols()) {
         throw std::invalid_argument("Submatrix exceeds parent matrix dimensions!");
     }
     return Matrix(size, offset, *this);
@@ -352,12 +396,12 @@ Matrix<T> Matrix<T>::submatrix(Dim size, Point offset) {
 
 template<typename T>
 bool Matrix<T>::is_square() const {
-    return _size.rows == _size.cols;
+    return _size.get_rows() == _size.get_cols();
 }
 
 template<typename T>
-bool Matrix<T>::is_square_power_of_two() const {
-    return _size.rows == _size.cols && Utils::is_power_of_two(_size.rows);
+bool Matrix<T>::is_pow2() const {
+    return _size.get_rows() == _size.get_cols() && Utils::is_power_of_two(_size.get_rows());
 }
 
 template<typename T>
@@ -367,12 +411,12 @@ Dim Matrix<T>::get_size() const {
 
 template<typename T>
 T &Matrix<T>::at(const Point index) {
-    return &_data[index.row * _size.cols + index.col];
+    return _data.get()[get_index_or_throw(index.row, index.col)];
 }
 
 template<typename T>
 const T &Matrix<T>::at(const Point index) const {
-    return &_data[index.row * _size.cols + index.col];
+    return _data.get()[get_index_or_throw(index.row, index.col)];
 }
 
 #pragma endregion
