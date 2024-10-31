@@ -5,10 +5,15 @@ bool Utils::is_power_of_two(const uint32_t n)  {
 }
 
 uint32_t Utils::bit_ceil(uint32_t n) {
-    int i = sizeof(n) * 8;
-    bool bit;
-    do {
-        bit = (n >> --i) & 1;
-    } while (bit != 1);
-    return i + 2;
+    if (n <= 1) {
+        return 1;
+    }
+
+    n--;
+    n |= n >> 1;
+    n |= n >> 2;
+    n |= n >> 4;
+    n |= n >> 8;
+    n |= n >> 16;
+    return n + 1;
 }
