@@ -8,7 +8,7 @@
 class Utils {
 public:
     static uint32_t bit_ceil(const uint32_t n);
-    static bool is_power_of_two(const uint32_t n);
+    static bool is_power_of_two(uint32_t n);
 };
 
 #endif //LINAL_UTILS_HPP
