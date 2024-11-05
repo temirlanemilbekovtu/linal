@@ -410,6 +410,13 @@ Matrix<T> Matrix<T>::submatrix(Dim size, Point offset) {
 }
 
 template<typename T>
+Matrix<T> Matrix<T>::get_square_pow2() const {
+    size_t max_dim = std::max(_size.get_rows(), _size.get_cols());
+    size_t new_dim = Utils::bit_ceil(max_dim);
+    return Matrix {Dim(new_dim, new_dim), *this};
+}
+
+template<typename T>
 bool Matrix<T>::is_square() const {
     return _size.get_rows() == _size.get_cols();
 }
