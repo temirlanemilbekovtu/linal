@@ -41,6 +41,8 @@ private:
     static Matrix<T> mul_winograd(const Matrix<T> &lhs, const Matrix<T> &rhs);
     static Matrix<T> mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs);
 
+    static void get_common_square_pow2(const Matrix<T> &src_a, const Matrix<T> &src_b, Matrix<T> &res_a, Matrix<T> &res_b);
+
     size_t get_index_or_throw(const size_t index) const;
     size_t get_index_or_throw(const size_t row, const size_t col) const;
 
@@ -399,6 +401,17 @@ size_t Matrix<T>::get_index_or_throw(const size_t row, const size_t col) const {
         throw std::out_of_range("Index out of Matrix bounds!");
     }
     return _offset_plain + col + row * _size.get_cols();
+}
+
+template<typename T>
+void
+Matrix<T>::get_common_square_pow2(const Matrix<T> &src_a, const Matrix<T> &src_b, Matrix<T> &res_a, Matrix<T> &res_b) {
+    size_t max_dim_a = std::max(src_a.get_size().get_rows(), src_a.get_size().get_cols());
+    size_t max_dim_b = std::max(src_b.get_size().get_rows(), src_b.get_size().get_cols());
+    size_t max_dim = std::max(max_dim_a, max_dim_b);
+    size_t new_dim = Utils::bit_ceil(max_dim);
+    res_a = Matrix<T>(Dim(new_dim, new_dim), src_a);
+    res_b = Matrix<T>(Dim(new_dim, new_dim), src_b);
 }
 
 template<typename T>
