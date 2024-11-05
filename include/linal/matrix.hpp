@@ -94,7 +94,7 @@ Matrix<T>::Matrix(const Dim size, const Point offset, const Matrix<T> &parent)
 template<typename T>
 Matrix<T>::Matrix(Dim size, const Matrix<T> &source) : Matrix(size) {
     Dim src_size = source.get_size();
-    if (src_size.get_rows() < _size.get_rows() && src_size.get_cols() < _size.get_cols()) {
+    if (src_size.get_rows() > _size.get_rows() || src_size.get_cols() > _size.get_cols()) {
         throw std::invalid_argument("Inner matrix must be smaller!");
     }
 
