@@ -35,6 +35,7 @@ private:
     std::shared_ptr<T[]> _data;
 
     explicit Matrix(Dim size, const Point offset, const Matrix<T> &parent);
+    explicit Matrix(Dim size, const Matrix<T> &source);
 
     static Matrix<T> mul_classic(const Matrix<T> &lhs, const Matrix<T> &rhs);
     static Matrix<T> mul_winograd(const Matrix<T> &lhs, const Matrix<T> &rhs);
@@ -89,6 +90,20 @@ Matrix<T>::Matrix(const Dim size, const Point offset, const Matrix<T> &parent)
         , _offset_plain(_offset.row * _total_cols + _offset.col)
         , _total_cols(parent._total_cols)
         , _data(parent._data) { }
+
+template<typename T>
+Matrix<T>::Matrix(Dim size, const Matrix<T> &source) : Matrix(size) {
+    Dim src_size = source.get_size();
+    if (src_size.get_rows() < _size.get_rows() && src_size.get_cols() < _size.get_cols()) {
+        throw std::invalid_argument("Inner matrix must be smaller!");
+    }
+
+    for(int i = 0; i < src_size.get_rows(); ++i) {
+        for(int j = 0; j < src_size.get_cols(); ++j) {
+            this->at(i, j) = source.at(i, j);
+        }
+    }
+}
 
 template<typename T>
 Matrix<T>::Matrix(const Dim size)
