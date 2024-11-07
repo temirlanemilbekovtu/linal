@@ -329,7 +329,36 @@ Matrix<T> Matrix<T>::mul_winograd(const Matrix<T> &lhs, const Matrix<T> &rhs) {
 
 template<typename T>
 Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
-    // to be implemented
+    Matrix<T> lhs_sqr, rhs_sqr;
+    get_common_square_pow2(lhs, rhs, lhs_sqr, rhs_sqr);
+
+    auto size = lhs_sqr.get_size();
+    auto half = size >> 1;
+
+    Matrix<T> res {size};
+    Matrix<T> lhs_subs[4], rhs_subs[4], res_subs[4];
+    for(int i = 0; i < size; i += half) {
+        for(int j = 0; j < size; j += half) {
+            lhs_subs[i] = lhs_sqr.submatrix(half, Point(i, j));
+            rhs_subs[i] = rhs_sqr.submatrix(half, Point(i, j));
+            res_subs[i] = res.submatrix(half, Point(i, j));
+        }
+    }
+
+    auto p1 = (rhs_subs[1] - rhs_subs[3]) * lhs_subs[0];
+    auto p2 = (lhs_subs[0] + lhs_subs[1]) * rhs_subs[3];
+    auto p3 = (lhs_subs[1] + lhs_subs[2]) * rhs_subs[0];
+    auto p4 = (rhs_subs[2] - rhs_subs[0]) * lhs_subs[3];
+    auto p5 = (lhs_subs[0] + lhs_subs[3]) * (rhs_subs[0] + rhs_subs[3]);
+    auto p6 = (lhs_subs[3] - lhs_subs[1]) * (rhs_subs[2] + rhs_subs[3]);
+    auto p7 = (lhs_subs[0] - lhs_subs[2]) * (rhs_subs[0] + rhs_subs[1]);
+
+    res[0] = p4 + p5 + p6 - p2;
+    res[1] = p1 + p2;
+    res[2] = p3 + p4;
+    res[3] = p1 + p5 - p3 - p7;
+
+    return res;
 }
 
 #pragma endregion
