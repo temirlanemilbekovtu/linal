@@ -103,7 +103,7 @@ Matrix<T>::Matrix(Dim size, const Matrix<T> &source) : Matrix(size) {
 
     for(int i = 0; i < src_size.get_rows(); ++i) {
         for(int j = 0; j < src_size.get_cols(); ++j) {
-            this->at(i, j) = source.at(i, j);
+            at(i, j) = source.at(i, j);
         }
     }
 }
@@ -127,7 +127,7 @@ Matrix<T>::Matrix(const Matrix<T> &other)
         : Matrix(other._size) {
     int card = _size.get_card();
     for(int i = 0; i < card; ++i) {
-        this[i] = other[i];
+        (*this)[i] = other[i];
     }
 }
 
@@ -146,7 +146,7 @@ Matrix<T> &Matrix<T>::operator=(const Matrix<T> &source) {
         size_t card = _size.get_card();
         _data = std::make_unique<T[]>(card);
         for(int i = 0; i < card; ++i) {
-            this[i] = source[i];
+            (*this)[i] = source[i];
         }
     }
 
@@ -371,7 +371,7 @@ void Matrix<T>::add(const Matrix<T> &rhs) {
 
     size_t card = _size.get_card();
     for(int i = 0; i < card; ++i) {
-        this[i] += rhs[i];
+        (*this)[i] += rhs[i];
     }
 }
 
@@ -381,7 +381,7 @@ void Matrix<T>::ddt(const Matrix<T> &rhs) {
 
     size_t card = _size.get_card();
     for(int i = 0; i < card; ++i) {
-        this[i] -= rhs[i];
+        (*this)[i] -= rhs[i];
     }
 }
 
@@ -389,7 +389,7 @@ template<typename T>
 void Matrix<T>::mul(const T &value) {
     size_t card = _size.get_card();
     for(int i = 0; i < card; ++i) {
-       this[i] *= value;
+        (this)[i] *= value;
     }
 }
 
