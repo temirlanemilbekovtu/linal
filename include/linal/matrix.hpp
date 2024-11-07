@@ -330,10 +330,19 @@ Matrix<T> Matrix<T>::mul_winograd(const Matrix<T> &lhs, const Matrix<T> &rhs) {
 
 template<typename T>
 Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
-    Matrix<T> lhs_sqr, rhs_sqr;
-    get_common_square_pow2(lhs, rhs, lhs_sqr, rhs_sqr);
+    Matrix<T> &lhs_sqr = lhs;
+    Matrix<T> &rhs_sqr = rhs;
+
+    if (!lhs_sqr.is_pow2() || !rhs_sqr.is_pow2() || lhs.get_size() != lhs.get_size()) {
+        get_common_square_pow2(lhs, rhs, lhs_sqr, rhs_sqr);
+    }
 
     auto size = lhs_sqr.get_size();
+
+    if (size == 2) {
+        return mul_classic(lhs_sqr, rhs_sqr);
+    }
+
     auto half = size >> 1;
 
     Matrix<T> res {size};
