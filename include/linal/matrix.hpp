@@ -407,6 +407,11 @@ size_t Matrix<T>::get_index_or_throw(const size_t row, const size_t col) const {
 template<typename T>
 void
 Matrix<T>::get_common_square_pow2(const Matrix<T> &src_a, const Matrix<T> &src_b, Matrix<T> &res_a, Matrix<T> &res_b) {
+    if (src_a.is_pow2() && src_b.is_pow2() && src_a.get_size() == src_b.get_size()) {
+        res_a = src_a;
+        res_b = src_b;
+        return;
+    }
     size_t max_dim_a = std::max(src_a.get_size().get_rows(), src_a.get_size().get_cols());
     size_t max_dim_b = std::max(src_b.get_size().get_rows(), src_b.get_size().get_cols());
     size_t max_dim = std::max(max_dim_a, max_dim_b);
