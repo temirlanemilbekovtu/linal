@@ -19,6 +19,7 @@ public:
     static_assert(is_addable<T>::value, "Type must support addition!");
     static_assert(is_deductible<T>::value, "Type must support deduction!");
     static_assert(is_multipliable<T>::value, "Type must support multiplication!");
+    static_assert(std::is_copy_assignable<T>::value, "Type must support copy assignment!");
     static_assert(std::is_default_constructible<T>::value, "Type must define default constructor!");
 
     enum MulType {
