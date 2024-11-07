@@ -355,13 +355,13 @@ Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
         }
     }
 
-    auto p1 = (rhs_subs[1] - rhs_subs[3]) * lhs_subs[0];
-    auto p2 = (lhs_subs[0] + lhs_subs[1]) * rhs_subs[3];
-    auto p3 = (lhs_subs[1] + lhs_subs[2]) * rhs_subs[0];
-    auto p4 = (rhs_subs[2] - rhs_subs[0]) * lhs_subs[3];
-    auto p5 = (lhs_subs[0] + lhs_subs[3]) * (rhs_subs[0] + rhs_subs[3]);
-    auto p6 = (lhs_subs[3] - lhs_subs[1]) * (rhs_subs[2] + rhs_subs[3]);
-    auto p7 = (lhs_subs[0] - lhs_subs[2]) * (rhs_subs[0] + rhs_subs[1]);
+    auto p1 = mul_strassen((rhs_subs[1] - rhs_subs[3]), lhs_subs[0]);
+    auto p2 = mul_strassen((lhs_subs[0] + lhs_subs[1]), rhs_subs[3]);
+    auto p3 = mul_strassen((lhs_subs[1] + lhs_subs[2]), rhs_subs[0]);
+    auto p4 = mul_strassen((rhs_subs[2] - rhs_subs[0]), lhs_subs[3]);
+    auto p5 = mul_strassen((lhs_subs[0] + lhs_subs[3]), (rhs_subs[0] + rhs_subs[3]));
+    auto p6 = mul_strassen((lhs_subs[3] - lhs_subs[1]), (rhs_subs[2] + rhs_subs[3]));
+    auto p7 = mul_strassen((lhs_subs[0] - lhs_subs[2]), (rhs_subs[0] + rhs_subs[1]));
 
     res[0] = p4 + p5 + p6 - p2;
     res[1] = p1 + p2;
