@@ -4,6 +4,7 @@
 #define LINAL_MATRIX_HPP
 
 #include <memory>
+#include <array>
 #include <stdexcept>
 
 #include "export.hpp"
@@ -113,7 +114,7 @@ Matrix<T>::Matrix(const Dim size)
         , _offset()
         , _offset_plain()
         , _total_cols(size.get_cols())
-        , _data(std::make_shared<T[]>(size.get_card())) { }
+        , _data(std::allocator<T>().allocate(size.get_card())) { }
 
 template<typename T>
 Matrix<T>::Matrix(const Dim size, const T &default_value)
