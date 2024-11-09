@@ -345,13 +345,13 @@ Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
 
     auto half = size >> 1;
 
-    Matrix<T> res {size};
+    Matrix<T> res_sqr {size};
     Matrix<T> lhs_subs[4], rhs_subs[4], res_subs[4];
     for(int i = 0; i < size; i += half) {
         for(int j = 0; j < size; j += half) {
             lhs_subs[i] = lhs_sqr.submatrix(half, Point(i, j));
             rhs_subs[i] = rhs_sqr.submatrix(half, Point(i, j));
-            res_subs[i] = res.submatrix(half, Point(i, j));
+            res_subs[i] = res_sqr.submatrix(half, Point(i, j));
         }
     }
 
@@ -363,12 +363,12 @@ Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
     auto p6 = mul_strassen((lhs_subs[3] - lhs_subs[1]), (rhs_subs[2] + rhs_subs[3]));
     auto p7 = mul_strassen((lhs_subs[0] - lhs_subs[2]), (rhs_subs[0] + rhs_subs[1]));
 
-    res[0] = p4 + p5 + p6 - p2;
-    res[1] = p1 + p2;
-    res[2] = p3 + p4;
-    res[3] = p1 + p5 - p3 - p7;
+    res_sqr[0] = p4 + p5 + p6 - p2;
+    res_sqr[1] = p1 + p2;
+    res_sqr[2] = p3 + p4;
+    res_sqr[3] = p1 + p5 - p3 - p7;
 
-    return res;
+    return res_sqr;
 }
 
 #pragma endregion
