@@ -368,7 +368,9 @@ Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
     res_sqr[2] = p3 + p4;
     res_sqr[3] = p1 + p5 - p3 - p7;
 
-    return res_sqr;
+    Matrix<int> res = res_sqr.submatrix(Dim(lhs.get_size().get_rows(), rhs.get_size().get_cols()), Point());
+
+    return res;
 }
 
 #pragma endregion
