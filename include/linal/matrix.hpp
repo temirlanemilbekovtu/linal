@@ -297,8 +297,8 @@ Matrix<T> Matrix<T>::mul_winograd(const Matrix<T> &lhs, const Matrix<T> &rhs) {
 
     size_t n_half = n / 2;
     size_t n_less = n - 1;
-    T row_factor[m] = {};
-    T col_factor[k] = {};
+    T *col_factor = new int[m];
+    T *row_factor = new int[k];
 
     for(int i = 0; i < n_half; ++i) {
         int i_plus = i + 1;
@@ -326,6 +326,9 @@ Matrix<T> Matrix<T>::mul_winograd(const Matrix<T> &lhs, const Matrix<T> &rhs) {
             }
         }
     }
+
+    delete[] row_factor;
+    delete[] col_factor;
 
     return result;
 }
