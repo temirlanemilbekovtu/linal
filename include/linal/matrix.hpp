@@ -82,7 +82,9 @@ public:
     Dim get_size() const;
 
     T &at(const Point index);
+    T &at(const size_t row, const size_t col);
     const T &at(const Point index) const;
+    const T &at(const size_t row, const size_t col) const;
 };
 
 #pragma region constructors
@@ -501,8 +503,18 @@ T &Matrix<T>::at(const Point index) {
 }
 
 template<typename T>
+T &Matrix<T>::at(const size_t row, const size_t col) {
+    return _data.get()[get_index_or_throw(row, col)];
+}
+
+template<typename T>
 const T &Matrix<T>::at(const Point index) const {
     return _data.get()[get_index_or_throw(index.row, index.col)];
+}
+
+template<typename T>
+const T &Matrix<T>::at(const size_t row, const size_t col) const {
+    return _data.get()[get_index_or_throw(row, col)];
 }
 
 #pragma endregion
