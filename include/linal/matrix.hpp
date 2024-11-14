@@ -260,7 +260,7 @@ Matrix<T> Matrix<T>::mul(const Matrix<T> &obj, const T &value) {
     Matrix<T> result{size};
     for(int i = 0; i < size.get_rows(); ++i) {
         for(int j = 0; j < size.get_cols(); ++j) {
-            result[i][j] = obj[i][j] * value;
+            result.at(i, j) = obj.at(i, j) * value;
         }
     }
     return result;
@@ -278,7 +278,7 @@ Matrix<T> Matrix<T>::mul_classic(const Matrix<T> &lhs, const Matrix<T> &rhs) {
     for(int i = 0; i < m; ++i) {
         for(int j = 0; j < k; ++j) {
             for(int l = 0; l < n; ++l) {
-                result[i][j] += lhs[i][l] * rhs[l][j];
+                result.at(i, j) += lhs.at(i, l) * rhs.at(l, j);
             }
         }
     }
@@ -303,26 +303,26 @@ Matrix<T> Matrix<T>::mul_winograd(const Matrix<T> &lhs, const Matrix<T> &rhs) {
     for(int i = 0; i < n_half; ++i) {
         int i_plus = i + 1;
         for(int j = 0; j < m; ++j) {
-            row_factor[j] += lhs[j][i] * lhs[j][i_plus];
+            row_factor[j] += lhs.at(j, i) * lhs.at(j, i_plus);
         }
         for(int j = 0; j < k; ++j) {
-            col_factor[j] += rhs[i][j] * rhs[i_plus][j];
+            col_factor[j] += rhs.at(i, j) * rhs.at(i_plus, j);
         }
     }
 
     for(int i = 0; i < m; ++i) {
         for(int j = 0; j < k; ++j) {
             for(int t = 0; t < n_half; t += 2) {
-                result[i][j] += (lhs[i][t] + rhs[t + 1][j]) * (lhs[i][t + 1] + rhs[t][j]);
+                result.at(i, j) += (lhs.at(i, t) + rhs.at(t + 1, j)) * (lhs.at(i, t + 1) + rhs.at(t, j));
             }
-            result[i][j] -= row_factor[i] + col_factor[j];
+            result.at(i, j) -= row_factor[i] + col_factor[j];
         }
     }
 
     if (n % 2 == 1) {
         for(int i = 0; i < m; ++i) {
             for(int j = 0; j < k; ++j) {
-                result[i][j] += lhs[i][n_less] * rhs[n_less][j];
+                result.at(i, j) += lhs.at(i, n_less) * rhs.at(n_less, j);
             }
         }
     }
