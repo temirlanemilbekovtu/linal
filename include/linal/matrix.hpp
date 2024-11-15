@@ -378,10 +378,10 @@ Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
     auto p6 = mul_strassen((lhs_subs[3] - lhs_subs[1]), (rhs_subs[2] + rhs_subs[3]));
     auto p7 = mul_strassen((lhs_subs[0] - lhs_subs[2]), (rhs_subs[0] + rhs_subs[1]));
 
-    res_sqr[0] = p4 + p5 + p6 - p2;
-    res_sqr[1] = p1 + p2;
-    res_sqr[2] = p3 + p4;
-    res_sqr[3] = p1 + p5 - p3 - p7;
+    res_subs[0] = p4 + p5 + p6 - p2;
+    res_subs[1] = p1 + p2;
+    res_subs[2] = p3 + p4;
+    res_subs[3] = p1 + p5 - p3 - p7;
 
     Matrix<int> res = res_sqr.submatrix(Dim(lhs.get_size().get_rows(), rhs.get_size().get_cols()), Point());
 
