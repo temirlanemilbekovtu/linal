@@ -345,19 +345,19 @@ Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
         rhs_sqr = rhs;
     }
 
-    auto dim = lhs_sqr.get_size();
+    Dim dim = lhs_sqr.get_size();
     size_t size = dim.get_rows();
 
     if (size == 2) {
         return mul_classic(lhs_sqr, rhs_sqr);
     }
 
-    auto half = size >> 1;
+    size_t half = size >> 1;
 
     Matrix<T> res_sqr {dim};
     Matrix<T> lhs_subs[4], rhs_subs[4], res_subs[4];
-    for(int i = 0; i < size; i += half) {
-        for(int j = 0; j < size; j += half) {
+    for(size_t i = 0; i < size; i += half) {
+        for(size_t j = 0; j < size; j += half) {
             lhs_subs[i] = lhs_sqr.submatrix(half, Point(i, j));
             rhs_subs[i] = rhs_sqr.submatrix(half, Point(i, j));
             res_subs[i] = res_sqr.submatrix(half, Point(i, j));
