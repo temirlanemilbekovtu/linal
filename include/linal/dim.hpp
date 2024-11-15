@@ -16,6 +16,7 @@ private:
     void update_card();
 
 public:
+    Dim();
     explicit Dim(const size_t rows, const size_t cols);
 
     Dim &operator=(const Dim &other);

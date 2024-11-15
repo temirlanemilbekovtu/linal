@@ -1,5 +1,7 @@
 #include "linal/dim.hpp"
 
+Dim::Dim() : Dim(0, 0) { }
+
 Dim::Dim(const size_t rows, const size_t cols)
     : rows(rows)
     , cols(cols)
