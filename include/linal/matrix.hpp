@@ -357,15 +357,16 @@ Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
         return mul_classic(lhs_sqr, rhs_sqr);
     }
 
-    size_t half = size >> 1;
+    size_t half_size = size >> 1;
+    Dim half_dim {half_size, half_size};
 
     Matrix<T> res_sqr {dim};
     Matrix<T> lhs_subs[4], rhs_subs[4], res_subs[4];
-    for(size_t i = 0; i < size; i += half) {
-        for(size_t j = 0; j < size; j += half) {
-            lhs_subs[i] = lhs_sqr.submatrix(half, Point(i, j));
-            rhs_subs[i] = rhs_sqr.submatrix(half, Point(i, j));
-            res_subs[i] = res_sqr.submatrix(half, Point(i, j));
+    for(size_t i = 0; i < size; i += half_size) {
+        for(size_t j = 0; j < size; j += half_size) {
+            lhs_subs[i] = lhs_sqr.submatrix(half_dim, Point(i, j));
+            rhs_subs[i] = rhs_sqr.submatrix(half_dim, Point(i, j));
+            res_subs[i] = res_sqr.submatrix(half_dim, Point(i, j));
         }
     }
 
