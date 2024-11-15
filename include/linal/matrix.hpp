@@ -345,7 +345,8 @@ Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
         rhs_sqr = rhs;
     }
 
-    auto size = lhs_sqr.get_size();
+    auto dim = lhs_sqr.get_size();
+    size_t size = dim.get_rows();
 
     if (size == 2) {
         return mul_classic(lhs_sqr, rhs_sqr);
@@ -353,7 +354,7 @@ Matrix<T> Matrix<T>::mul_strassen(const Matrix<T> &lhs, const Matrix<T> &rhs) {
 
     auto half = size >> 1;
 
-    Matrix<T> res_sqr {size};
+    Matrix<T> res_sqr {dim};
     Matrix<T> lhs_subs[4], rhs_subs[4], res_subs[4];
     for(int i = 0; i < size; i += half) {
         for(int j = 0; j < size; j += half) {
