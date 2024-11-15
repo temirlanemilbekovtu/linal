@@ -49,6 +49,7 @@ private:
     size_t get_index_or_throw(const size_t row, const size_t col) const;
 
 public:
+    Matrix();
     explicit Matrix(const Dim size);
     explicit Matrix(const Dim size, const T &default_value);
     Matrix(const Matrix<T> &other);
@@ -110,6 +111,10 @@ Matrix<T>::Matrix(Dim size, const Matrix<T> &source) : Matrix(size) {
         }
     }
 }
+
+template<typename T>
+Matrix<T>::Matrix()
+        : Matrix(Dim(0, 0)) { }
 
 template<typename T>
 Matrix<T>::Matrix(const Dim size)
